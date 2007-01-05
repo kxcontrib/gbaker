@@ -18,8 +18,8 @@ erf: {{$[x = 0; 0f; x < 0; neg abserf abs x; abserf x ]} each x}
 
 abserf: {x: abs x; min (1; (2 * x % sqrt .maths.pi) * .maths.kummer[0.5; 1.5; neg x * x; 15])}
 
-/	Random sample on x items from the standardised Gaussian distribution.
+/	Random sample of x items from the standardised Gaussian distribution.
 
-random: {r: (); do[max 1 `int$ x; r,: (sum 12 ? 1f) - 6]; r}
+random: {x: max (1; `int$ x); r: (); do[x; r,: (sum 12 ? 1f) - 6]; $[x = 1; first r; r]}
 
 \d .
