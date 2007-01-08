@@ -24,7 +24,7 @@ tanh: {(e - 1) % (e: exp 2 * x) + 1}
 
 /	The n'th Pochhammer symbol for x.
 
-pochhammer: {[x; n] $[not n > 0; 1f; prd `float$ x + `float$ til `int$ n]}
+pochhammer: {[x; n] $[n <= 0; 1; prd x + til `int$ n]}
 
 /	Factorial x
 
