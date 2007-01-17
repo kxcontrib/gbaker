@@ -9,6 +9,10 @@ z: {(x - avg x) % dev x}
 
 Z: {[x; m; s] (x - m) % s}
 
+/	Modal value of x.
+
+mode: {h: count each group x; h ? max h}
+
 /	Empirical probability distribution function, returning a dictionary of probability keyed on bound.
 /	Probability of a given value x is given by indexing the dictionary with [first k where (k: key pdf) > x].
 
