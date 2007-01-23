@@ -11,10 +11,10 @@ xh: ()
 /	---------
 
 filter: {
-        x: `float$ x;
+        x: `float $ x;
         mv:: var x;
         xh:: enlist (first x; mv);
-        if [1 < count x; {xh,: enlist correct[predict last xh; x]} each 1 _ x;];
+        if [1 < count x; {xh,: enlist correct [predict last xh; x]} each 1 _ x;];
         xh
     }
 

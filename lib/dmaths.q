@@ -19,20 +19,24 @@ cosh: {0.5 * (exp x) + exp neg x}
 
 tanh: {(e - 1) % (e: exp 2 * x) + 1}
 
+
 /	Special functions
 /	-----------------
 
 /	The n'th Pochhammer symbol for x.
 
-pochhammer: {[x; n] $[n <= 0; 1; prd x + til `int$ n]}
+pochhammer: {[x; n] $[n <= 0; 1; prd x + til `int $ n]}
+
 
 /	Factorial x
 
 factorial: {{pochhammer[1; x]} each x}
 
+
 /	The Kummer function for z, over n terms. From MathWorld. Expression courtesy of arthur.
 
-kummer: {[a; b; z; n] 1 + sum prds (z * a + n) % (1 + n) * b + n: til `int$ abs n}
+kummer: {[a; b; z; n] 1 + sum prds (z * a + n) % (1 + n) * b + n: til `int $ abs n}
+
 
 /	Miscellaneous
 /	-------------
