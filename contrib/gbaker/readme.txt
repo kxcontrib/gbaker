@@ -10,8 +10,12 @@ is akin to an object in an OO language. Likewise, each context is defined in
 its own file, with the convention that the name begins with 'd' to remind the reader
 that the content starts with \d.
 
-The import of dependent q contexts is NOT defined in the files. To do this I use
-Simon Gardner's template:
+The import of dependent q contexts is NOT defined in the files. This allows loading all
+the scripts by starting a q process in the library directory:
+
+	s64/q /path/to/library
+
+To do explict loading I use Simon Gardner's template:
 
 	if [not @ [value; ".context.someboolean"; 0b]; value "\\l dcontext.q"]
 
