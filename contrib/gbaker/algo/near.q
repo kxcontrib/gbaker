@@ -92,7 +92,7 @@ nearside:: select sum qty by link, prx from downstream where tactic = `near
 .process.upd [`NEARREGULARDECISION]: {
 	x: update q: gross [id.rate * nearqty - ownqty; id.rate] - ownqty from x;
 	x: update q: q & leaves - ownqty from x;
-	upd [`NEARACTION; select from x where q >= id.minsize];
+	upd [`NEARACTION; select from x where q >= id.size];
 	}
 
 .process.upd [`NEARLOWDECISION]: {
@@ -106,7 +106,7 @@ nearside:: select sum qty by link, prx from downstream where tactic = `near
 	}
 
 .process.upd [`NEARCAPACITY]: {
-	t: select id, low: 1b from controlnear where id in x [`id], not low, id.minsize >= leaves;
+	t: select id, low: 1b from controlnear where id in x [`id], not low, id.size >= leaves;
 	upd [`ALARMS; select id, who: `near, what: `low from t];
 	`controlnear upsert t;
 	}
