@@ -18,6 +18,7 @@ nearside:: select sum qty by link, prx from downstream where tactic = `near
 	upd [`ALARMS; select id, who: `near, what: `allocated from x];
 	x: `id xkey select id, q: qty from x;
 	`controlnear upsert .tactic.increase x lj controlnear;
+	update low: 0b from `controlnear where id in exec id from x;
 	upd [`NEARCAPACITY; select id from x];
 	}
 
