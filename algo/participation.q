@@ -8,9 +8,9 @@
 
 /----------------------------------------------------------------------------------------------------------------------
 / Upstream
-/ 2009.02.18 Added midprx benchmark; and minqty becomes minsize as minqty has a different meaning in FIX.
+/ 2009.02.18 Added midprx benchmark; and minqty becomes size as minqty has a different meaning in FIX.
 
-upstream: select by id from update rate: 0f, minsize: 0, maxtake: 0f from delete tif from delete from .schema.orders;
+upstream: select by id from update rate: 0f, size: 0, maxtake: 0f from delete tif from delete from .schema.orders;
 
 progress: (
 	[id:		`upstream$	()]

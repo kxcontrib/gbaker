@@ -1,6 +1,6 @@
 
 controlfar: select by id from
-				update qty: 0, minsize: 0, maxtake: 0f, pendingfill: 0b, level: 0, cancelling: 0b from
+				update qty: 0, size: 0, maxtake: 0f, pendingfill: 0b, level: 0, cancelling: 0b from
 					select id, filled, leaves from
 						delete from progress;
 
@@ -10,10 +10,10 @@ controlfar: select by id from
 
 .tactic.parameters [`far]: {
 	`controlfar insert
-		select id, qty: 0, filled: 0, leaves: 0, minsize: 1, maxtake: 1f, pendingfill: 0b, level: 0, cancelling: 0b
+		select id, qty: 0, filled: 0, leaves: 0, size: 1, maxtake: 1f, pendingfill: 0b, level: 0, cancelling: 0b
 			from x where not id in exec id from controlfar;
 	c: cols x;
-	if [`minsize in c; `controlfar upsert select id, minsize from x];
+	if [`size in c; `controlfar upsert select id, size from x];
 	if [`maxtake in c; `controlfar upsert select id, maxtake from x];
 	}
 
@@ -21,7 +21,8 @@ controlfar: select by id from
 	upd [`ALARMS; select id, who: `far, what: `allocated from x];
 	x: `id xkey select id, q: qty from x;
 	`controlfar upsert .tactic.increase x lj controlfar;
-	upd [`FARCOMPLETING; select id from x];
+	update size: id.size, maxtake: id.maxtake from `controlfar where id in exec id from x;
+	upd [`FARCAPACITY; select id from x];
 	}
 
 .tactic.cancel [`far]: {
@@ -93,10 +94,10 @@ controlfar: select by id from
 .process.upd [`FARDECISION]: {
 	upd [`ALARMS; select id, who: `far, what: `leaves from x where leaves < q];
 	x: update q: q & leaves, m: `int$ maxtake * farqty from x;
-	`controlfar upsert select id, level: ?[(m < q) and (minsize > 1); farqty; 0] from x;
+	`controlfar upsert select id, level: ?[(m < q) and (size > 1); farqty; 0] from x;
 	upd [`ALARMS; select id, who: `far, what: `maxtake from x where m < q];
 	x : update q: m from x where m < q;
-	upd [`FARACTION; select from x where q >= minsize];
+	upd [`FARACTION; select from x where q >= size];
 	}
 
 .process.upd [`FARACTION]: {
@@ -105,7 +106,7 @@ controlfar: select by id from
 	}
 
 .process.upd [`FARCAPACITY]: {
-	t: select id, minsize: 1, maxtake: 1f, level: 0 from controlfar where id in x [`id], minsize > 1, minsize >= leaves;
+	t: select id, size: 1, maxtake: 1f, level: 0 from controlfar where id in x [`id], size > 1, size >= leaves;
 	upd [`ALARMS; select id, who: `far, what: `low from t];
 	`controlfar upsert t;
 	}
