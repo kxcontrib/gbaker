@@ -147,6 +147,18 @@ benchmarks:: select
 					from progress lj control
 
 /----------------------------------------------------------------------------------------------------------------------
+/ Timer events, added 2009.02.25
+
+.process.upd [`at]: {
+	{[t; x] .tactic.at [t; select id from x where name = t]} [; x] each exec distinct name from x;
+	}
+
+.process.upd [`recurring]: {
+	{[t; x] .tactic.recurring [t; select id from x where name = t]} [; x] each exec distinct name from x;
+	}
+
+
+/----------------------------------------------------------------------------------------------------------------------
 / Run
 
 h: @[hopen; 2009; 0]
