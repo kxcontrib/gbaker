@@ -6,8 +6,9 @@ controlnear: select by id from
 
 nearside:: select sum qty by link, prx from downstream where tactic = `near
 
+
 /----------------------------------------------------------------------------------------------------------------------
-/ Tactic context
+/ Parameters and allocations
 
 .tactic.parameters [`near]: {
 	`controlnear insert select id, qty: 0, filled: 0, leaves: 0, prx: 0f, low: 0b, cancelling: 0b
@@ -22,54 +23,16 @@ nearside:: select sum qty by link, prx from downstream where tactic = `near
 	upd [`NEARCAPACITY; select id from x];
 	}
 
-.tactic.cancel [`near]: {
-	upd [`NEARCANCEL; select id from controlnear where id in x [`id], not cancelling];
-	}
-
-.tactic.filled [`near]: {
-	upd [`NEARFILLED; select from x where tactic = `near];
-	}
-
-.tactic.cancelled [`near]: {
-	upd [`NEARCANCELLED; select from x where tactic = `near];
-	}
-
-.tactic.quoted [`near]: {
-	upd [`NEARSIGNAL; select from x where id in exec id from controlnear where not cancelling, (leaves > 0) or (id in exec link from nearside)];
-	}
-
 .tactic.left [`near]: {
 	select id, qty, leaves, tactic: `near from controlnear where id in x `id
 	}
 
 
 /----------------------------------------------------------------------------------------------------------------------
-/ Process context
+/ Signals
 
-.process.upd [`NEARCANCEL]: {
-	upd [`ALARMS; select id, who: `near, what: `cancel from x];
-	upd [`NEARCANCELACTION; select id, link from downstream where link in x [`id], tactic = `near, not cancelling];
-	}
-
-.process.upd [`NEARCANCELACTION]: {
-	update cancelling: 1b from `controlnear where id in x `link;
-	upd [`QXCANCEL; select id from x];
-	}
-
-.process.upd [`NEARCANCELLED]: {
-	upd [`NEARCANCELLING; select id from controlnear where cancelling, id in exec link from x];
-	}
-
-.process.upd [`NEARCANCELLING]: {
-	update leaves: 0, qty: filled, prx: 0f, cancelling: 0b from `controlnear where id in x `id;
-	upd [`ALLOCATIONS; select id from x];
-	}
-
-.process.upd [`NEARFILLED]: {
-	x: .tactic.aggregate x;
-	`controlnear upsert .tactic.accounting x lj controlnear;
-	update prx: 0f from `controlnear where not id in exec link from nearside;
-	upd [`NEARCAPACITY; select id from x];
+.tactic.quoted [`near]: {
+	upd [`NEARSIGNAL; select from x where id in exec id from controlnear where not cancelling, (leaves > 0) or (id in exec link from nearside)];
 	}
 
 .process.upd [`NEARSIGNAL]: {
@@ -106,8 +69,58 @@ nearside:: select sum qty by link, prx from downstream where tactic = `near
 	upd [`QXNEW; select id.sym, id.dir, qty: q, prx: nearprx, link: id, tif: `DAY, tactic: `near from x];
 	}
 
+
+/----------------------------------------------------------------------------------------------------------------------
+/ Downstream filled
+
+.tactic.filled [`near]: {
+	upd [`NEARFILLED; select from x where tactic = `near];
+	}
+
+.process.upd [`NEARFILLED]: {
+	x: .tactic.aggregate x;
+	`controlnear upsert .tactic.accounting x lj controlnear;
+	update prx: 0f from `controlnear where not id in exec link from nearside;
+	upd [`NEARCAPACITY; select id from x];
+	}
+
 .process.upd [`NEARCAPACITY]: {
 	t: select id, low: 1b from controlnear where id in x [`id], not low, id.size >= leaves;
 	upd [`ALARMS; select id, who: `near, what: `low from t];
 	`controlnear upsert t;
+	}
+
+
+/----------------------------------------------------------------------------------------------------------------------
+/ Downstream cancelled
+
+.tactic.cancelled [`near]: {
+	upd [`NEARCANCELLED; select from x where tactic = `near];
+	}
+
+.process.upd [`NEARCANCELLED]: {
+	upd [`NEARCANCELLING; select id from controlnear where cancelling, id in exec link from x];
+	}
+
+.process.upd [`NEARCANCELLING]: {
+	update leaves: 0, qty: filled, prx: 0f, cancelling: 0b from `controlnear where id in x `id;
+	upd [`ALLOCATIONS; select id from x];
+	}
+
+
+/----------------------------------------------------------------------------------------------------------------------
+/ Cancellation
+
+.tactic.cancel [`near]: {
+	upd [`NEARCANCEL; select id from controlnear where id in x [`id], not cancelling];
+	}
+
+.process.upd [`NEARCANCEL]: {
+	upd [`ALARMS; select id, who: `near, what: `cancel from x];
+	upd [`NEARCANCELACTION; select id, link from downstream where link in x [`id], tactic = `near, not cancelling];
+	}
+
+.process.upd [`NEARCANCELACTION]: {
+	update cancelling: 1b from `controlnear where id in x `link;
+	upd [`QXCANCEL; select id from x];
 	}

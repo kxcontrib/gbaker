@@ -6,7 +6,7 @@ controlfar: select by id from
 
 
 /----------------------------------------------------------------------------------------------------------------------
-/ Tactic context
+/ Parameters and allocations
 
 .tactic.parameters [`far]: {
 	`controlfar insert
@@ -25,19 +25,12 @@ controlfar: select by id from
 	upd [`FARCAPACITY; select id from x];
 	}
 
-.tactic.cancel [`far]: {
-	upd [`ALARMS; select id, who: `far, what: `cancel from x];
-	upd [`FARCANCELLING; select id from controlfar where not pendingfill, id in x `id];
-	update cancelling: 1b from `controlfar where pendingfill, id in x `id;
+.tactic.left [`far]: {
+	select id, qty, leaves, tactic: `far from controlfar where id in x `id
 	}
 
-.tactic.filled [`far]: {
-	upd [`FARFILLED; select from x where tactic = `far];
-	}
-
-.tactic.cancelled [`far]: {
-	upd [`FARCANCELLED; select from x where tactic = `far];
-	}
+/----------------------------------------------------------------------------------------------------------------------
+/ Signals
 
 .tactic.traded [`far]: {
 	upd [`FARSIGNAL; select from x where id in exec id from controlfar where leaves > 0, not pendingfill];
@@ -45,33 +38,6 @@ controlfar: select by id from
 
 .tactic.quoted [`far]: {
 	upd [`FARSIGNAL; select from x where id in exec id from controlfar where leaves > 0, not pendingfill, level > 0];
-	}
-
-.tactic.left [`far]: {
-	select id, qty, leaves, tactic: `far from controlfar where id in x `id
-	}
-
-
-/----------------------------------------------------------------------------------------------------------------------
-/ Process context
-/ 2009.02.18 new cancellation protocol.
-
-.process.upd [`FARCANCELLING]: {
-	update leaves: 0, qty: filled, cancelling: 0b from `controlfar where id in x `id;
-	}
-
-.process.upd [`FARFILLED]: {
-	x: .tactic.aggregate x;
-	`controlfar upsert .tactic.accounting x lj controlfar;
-	update pendingfill: 0b from `controlfar where id in exec id from x;
-	upd [`FARCAPACITY; select id from x];
-	upd [`FARCANCELLING; select id from x lj controlfar where cancelling];
-	}
-
-.process.upd [`FARCANCELLED]: {
-	upd [`ALARMS; select id: link, who: `far, what: `IOC from x];
-	update pendingfill: 0b from `controlfar where id in exec link from x;
-	upd [`FARCANCELLING; select id from controlfar where cancelling, id in x `link];
 	}
 
 .process.upd [`FARSIGNAL]: {
@@ -105,9 +71,53 @@ controlfar: select by id from
 	upd [`QXNEW; select id.sym, id.dir, qty: q, prx: farprx, link: id, tif: `IOC, tactic: `far from x];
 	}
 
+
+/----------------------------------------------------------------------------------------------------------------------
+/ Downstream filled
+
+.tactic.filled [`far]: {
+	upd [`FARFILLED; select from x where tactic = `far];
+	}
+
+.process.upd [`FARFILLED]: {
+	x: .tactic.aggregate x;
+	`controlfar upsert .tactic.accounting x lj controlfar;
+	update pendingfill: 0b from `controlfar where id in exec id from x;
+	upd [`FARCAPACITY; select id from x];
+	upd [`FARCANCELLING; select id from x lj controlfar where cancelling];
+	}
+	
 .process.upd [`FARCAPACITY]: {
 	t: select id, size: 1, maxtake: 1f, level: 0 from controlfar where id in x [`id], size > 1, size >= leaves;
 	upd [`ALARMS; select id, who: `far, what: `low from t];
 	`controlfar upsert t;
 	}
 
+
+/----------------------------------------------------------------------------------------------------------------------
+/ Downstream cancelled
+
+.tactic.cancelled [`far]: {
+	upd [`FARCANCELLED; select from x where tactic = `far];
+	}
+
+.process.upd [`FARCANCELLED]: {
+	upd [`ALARMS; select id: link, who: `far, what: `IOC from x];
+	update pendingfill: 0b from `controlfar where id in exec link from x;
+	upd [`FARCANCELLING; select id from controlfar where cancelling, id in x `link];
+	}
+
+
+/----------------------------------------------------------------------------------------------------------------------
+/ Cancellation
+
+.tactic.cancel [`far]: {
+	upd [`ALARMS; select id, who: `far, what: `cancel from x];
+	upd [`FARCANCELLING; select id from controlfar where not pendingfill, id in x `id];
+	update cancelling: 1b from `controlfar where pendingfill, id in x `id;
+	}
+
+/ 2009.02.18 new cancellation protocol.
+.process.upd [`FARCANCELLING]: {
+	update leaves: 0, qty: filled, cancelling: 0b from `controlfar where id in x `id;
+	}
