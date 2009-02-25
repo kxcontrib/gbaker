@@ -43,6 +43,19 @@ cancelled:	() ! ()
 
 left:		() ! ()
 
+/ 2009.02.25 Integrated timer events
+
+/ Notify a time event.
+/ Columns of x are `id.
+
+at:			() ! ()
+
+/ Notify a recurring time event.
+/ Columns of x are `id.
+
+recurring:	() ! ()
+
+
 
 / Convenience functions to increase order quantity, aggregate fills and account for fills.
 
