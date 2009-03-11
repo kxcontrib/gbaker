@@ -1,12 +1,12 @@
-require:	{.require.map [type x; x];}
+require: {.require.map [type x; x];}
 
 \d .require
 
-verbose:	1b
+verbose: 1b
 
-map: 		(-11h; 11h; 10h; 0h) ! ({action x;}; {action each x;}; {action `$x;}; {action each `$x;})
+map: (-11h; 11h; 10h; 0h) ! ({action x;}; {action each x;}; {action `$x;}; {action each `$x;})
 
-loaded:		()
+loaded: ()
 
 action: {
 	if [not x in loaded;
@@ -20,8 +20,9 @@ action: {
 
 \
 
-Load once feature, to overcome side effects of scripts that initialise on loading. Only the first script of the
-q process needs to use \l common/require.q. Other scripts use, for example:
+Load once feature, to overcome side effects of scripts that initialise on
+loading. Only the first script of the q process needs to use
+\l common/require.q. Other scripts use, for example:
 
 	require "common/util.q"
 	require ("common/quant.q"; "common/util.q")
