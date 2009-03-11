@@ -1,3 +1,6 @@
+require "common/process.q"
+require "algo/tactic.q"
+
 
 controlfar: select by id from
 				update qty: 0, size: 0, maxtake: 0f, pendingfill: 0b, level: 0, cancelling: 0b from
@@ -37,7 +40,10 @@ controlfar: select by id from
 	}
 
 .tactic.quoted [`far]: {
-	upd [`FARSIGNAL; select from x where id in exec id from controlfar where leaves > 0, not pendingfill, level > 0];
+	upd [`FARSIGNAL;
+		select from x where
+			withinlimit [id.dir; far [id.dir; bidprx; askprx]; id.prx],
+			id in exec id from controlfar where leaves > 0, not pendingfill, level > 0];
 	}
 
 .process.upd [`FARSIGNAL]: {

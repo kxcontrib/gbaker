@@ -1,3 +1,6 @@
+require "common/process.q"
+require "algo/tactic.q"
+
 
 controlnear: select by id from
 				update qty: 0, prx: 0f, low: 0b, cancelling: 0b from

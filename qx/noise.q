@@ -1,7 +1,9 @@
-\l common/util.q
-\l qx/global.q
-\l qx/member.q
-\l qx/seq.q
+\l common/require.q
+
+require "common/util.q"
+require "qx/global.q"
+require "qx/member.q"
+require "qx/seq.q"
 
 quotes: ()
 
@@ -58,6 +60,6 @@ cancel: {
 	}
 
 
-h: @[hopen; 2009; 0]
+h: @[hopen; value .util.args `qx; 0]
 quotes,: h (`snap; ([] sym: `AAA`BBB`CCC`DDD`EEE`FFF))
 \t 1000

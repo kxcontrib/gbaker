@@ -1,3 +1,4 @@
+require "algo/tactic.q"
 
 .allocation.multiple: 6
 

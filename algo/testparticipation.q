@@ -1,6 +1,8 @@
-\l algo/participation.q
-\l algo/far.q
-\l algo/near.q
+\l common/require.q
+
+require "algo/participation.q"
+require "algo/far.q"
+require "algo/near.q"
 
 upd [`new; enlist `id`sym`dir`qty`prx`rate`size`maxtake ! (`first; `AAA; `BUY; 25000; 110.0; 0.25; 1000; 0.75)]
 upd [`new; enlist `id`sym`dir`qty`prx`rate`size`maxtake ! (`second; `AAA; `SELL; 42000; 98.0; 0.25; 1000; 0.75)]

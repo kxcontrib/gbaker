@@ -1,16 +1,16 @@
-\l common/process.q
-\l common/util.q
-\l qx/schema.q
-\l qx/seq.q
-\l algo/filter.q
-\l algo/tactic.q
-\l algo/allocation.q
+require "common/process.q"
+require "common/util.q"
+require "qx/schema.q"
+require "qx/seq.q"
+require "algo/filter.q"
+require "algo/tactic.q"
+require "algo/allocation.q"
 
 /----------------------------------------------------------------------------------------------------------------------
 / Upstream
 / 2009.02.18 Added midprx benchmark; and minqty becomes size as minqty has a different meaning in FIX.
 
-upstream: select by id from update rate: 0f, size: 0, maxtake: 0f from delete tif from delete from .schema.orders;
+upstream: select by id from update rate: 0f, size: 0, maxtake: 0f, expire: .z.T from delete tif from delete from .schema.orders;
 
 progress: (
 	[id:		`upstream$	()]
@@ -30,12 +30,13 @@ control: `id xkey select id, filled, volume from delete from progress;
 .process.upd [`new]: {
 	t: x [`sym] except exec sym from quotes;
 	if [count t;
-		`quotes insert h (`snap; ([] sym: t))
+		`quotes insert h [`qx] (`snap; ([] sym: t))
 	];
 	upd [`NEW; delete from x where id in exec id from upstream];
 	}
 
 .process.upd [`NEW]: {
+	x: update expire: `time$ expire from x;
 	`upstream insert x;
 	`progress insert select id, midprx: 0f, filled: 0, avgprx: 0f, leaves: qty, volume: 0, vwap: 0f from x;
 	t: `sym xkey select id, id.sym from progress where id in x `id;
@@ -113,12 +114,12 @@ downstream: select by id from update link: `upstream$ `, tactic: `, cancelling: 
 .process.upd [`QXNEW]: {
 	x: update id: .seq.allocate count x, cancelling: 0b from x;
 	`downstream insert x;
-	.util.printif @[neg h; (`upd; `new; delete link, tactic, cancelling from x); "failed to send orders"];
+	.util.printif @[neg h `qx; (`upd; `new; delete link, tactic, cancelling from x); "failed to send orders"];
 	}
 
 .process.upd [`QXCANCEL]: {
 	update cancelling: 1b from `downstream where id in x `id;
-	.util.printif @[neg h; (`upd; `cancel; x); "failed to send cancellations"];
+	.util.printif @[neg h `qx; (`upd; `cancel; x); "failed to send cancellations"];
 	}
 
 
@@ -150,15 +151,20 @@ benchmarks:: select
 / Timer events, added 2009.02.25
 
 .process.upd [`at]: {
-	{[t; x] .tactic.at [t; select id from x where name = t]} [; x] each exec distinct name from x;
+	n: exec distinct name from x;
+	{[t; x] .tactic.at [t; select id from x where name = t]} [; x] each n inter key .tactic.at;
 	}
 
 .process.upd [`recurring]: {
-	{[t; x] .tactic.recurring [t; select id from x where name = t]} [; x] each exec distinct name from x;
+	n: exec distinct name from x;
+	{[t; x] .tactic.recurring [t; select id from x where name = t]} [; x] each n inter key .tactic.recurring;
 	}
 
 
 /----------------------------------------------------------------------------------------------------------------------
 / Run
 
-h: @[hopen; 2009; 0]
+h: `qx`timer ! (0; 0)
+args: .util.args ()
+h [`qx]:	@[hopen; value args `qx; 0]
+h [`timer]:	@[hopen; value args `timer; 0]

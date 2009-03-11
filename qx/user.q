@@ -1,7 +1,9 @@
-\l common/util.q
-\l qx/member.q
-\l qx/seq.q
-\l qx/player.q
+\l common/require.q
+
+require "common/util.q"
+require "qx/member.q"
+require "qx/seq.q"
+require "qx/player.q"
 
 template: enlist `sym`dir`qty`prx`tif ! (`AAA; `BUY; 1000; 0f; `IOC)
 
@@ -14,7 +16,7 @@ cancel: {
 	.util.printif @[neg h; (`upd; `cancel; x); "failed to send cancellation"];
 	}
 	
-h: @[hopen; 2009; 0]
+h: @[hopen; value .util.args `qx; 0]
 
 /
 

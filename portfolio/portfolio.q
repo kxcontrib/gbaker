@@ -1,4 +1,4 @@
-\l common/quant.q
+require "common/quant.q"
 
 \d .portfolio
 
