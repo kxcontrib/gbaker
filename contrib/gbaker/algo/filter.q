@@ -1,4 +1,4 @@
-\l qx/global.q
+require "qx/global.q"
 
 \d .filter
 

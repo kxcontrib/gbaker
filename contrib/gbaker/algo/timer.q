@@ -1,5 +1,7 @@
-\l common/process.q
-\l common/util.q
+\l common/require.q
+
+require "common/process.q"
+require "common/util.q"
 
 /----------------------------------------------------------------------------------------------------------------------
 / Connection management

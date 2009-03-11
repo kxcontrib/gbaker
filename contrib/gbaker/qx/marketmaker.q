@@ -1,10 +1,9 @@
-/----------------------------------------------------------------------------------------------------------------------
-/ Dependencies
+\l common/require.q
 
-\l common/process.q
-\l common/util.q
-\l qx/schema.q
-\l qx/seq.q
+require "common/process.q"
+require "common/util.q"
+require "qx/schema.q"
+require "qx/seq.q"
 
 
 /----------------------------------------------------------------------------------------------------------------------
@@ -133,5 +132,5 @@ opening: {
 / Run
 
 `control upsert ("SIFF"; enlist csv) 0: `:/kdb/qx/marketmaker.csv;
-h: @[hopen; 2009; 0]
+h: @[hopen; value .util.args `qx; 0]
 opening h (`snap; ([] sym:()));

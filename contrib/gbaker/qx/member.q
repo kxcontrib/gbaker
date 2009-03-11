@@ -1,4 +1,4 @@
-\l common/process.q
+require "common/process.q"
 
 .process.upd [`quotes]:		{show x;}
 .process.upd [`trades]:		{show x;}
