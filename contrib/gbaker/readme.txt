@@ -1,35 +1,6 @@
-lib
-===
+Notes
+=====
  
-
-Organisation
-------------
-
-Closely related functions and variables are defined within q contexts. Each q context
-is akin to an object in an OO language. Likewise, each context is defined in
-its own file, with the convention that the name begins with 'd' to remind the reader
-that the content starts with \d.
-
-The import of dependent q contexts is NOT defined in the files. This allows loading all
-the scripts by starting a q process in the library directory:
-
-	s64/q /path/to/library
-
-To do explict loading I use Simon Gardner's template:
-
-	if [not @ [value; ".context.someboolean"; 0b]; value "\\l dcontext.q"]
-
-The problem of where the library is located can be solved using an argument when starting
-the q process. For example;
-
-	s64/q -lib /path/to/library/
-
-and then;
- 
-	args: .Q.opt .z.x;
-	fullname: $ [count args `lib; first args `lib; ""], "dcontext.q";
-
-
 
 Style
 -----
